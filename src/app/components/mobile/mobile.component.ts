@@ -9,38 +9,31 @@ import { timeInterval, timeout } from 'rxjs/operators';
   animations: [
     trigger('card', [
       transition('*=>rightOut', [
-        style({ zIndex: 100 }),
-        animate('500ms', style({
+        style({ zIndex: 100, boxShadow: 'none' }),
+        animate('300ms', style({
           transform: 'rotate(25deg)',
           transformOrigin: 'bottom right'
         })),
-        animate('500ms', style({
+        animate('300ms', style({
           transform: 'translateX(200%)',
           zIndex: 0
         }))
       ]),
       transition('*=>leftOut', [
-        style({ zIndex: 100 }),
-        animate('500ms', style({
+        style({ zIndex: 100, boxShadow: 'none' }),
+        animate('300ms', style({
           transform: 'rotate(-25deg)',
           transformOrigin: 'bottom left'
         })),
-        animate('500ms', style({
+        animate('300ms', style({
           transform: 'translateX(-200%)',
           zIndex: 0
         }))
       ]),
-      transition('*=>endFront', [
-        animate('1s', style({
-          opacity: 1,
-          transform: 'translateX(0)',
-          zIndex: 100
-        }))
-      ]),
-      transition('*=>endBack', [
-        animate('1s', style({
-          opacity: 1,
-          transform: 'translateX(0)',
+      transition('*=>sendOut', [
+        style({ zIndex: 100, boxShadow: 'none' }),
+        animate('300ms', style({
+          transform: 'translateY(-200%)',
           zIndex: 0
         }))
       ]),
@@ -49,41 +42,45 @@ import { timeInterval, timeout } from 'rxjs/operators';
 export class MobileComponent implements OnInit {
   score: number = 12
   username: string = 'BamBam';
-  test: boolean;
-  card: string = 'card1';
-  test2: boolean
-  card1: string;
-  card2: string;
+  animateCard: string;
+  trigger: string;
+
+  cards = ['I am card 1 and i have an answer', 'I am card 2', 'test 3']
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  right(num: number) {
-    this.card1 = num === 1 ? 'rightOut' : '';
-    this.card2 = num === 2 ? 'rightOut' : '';
+  right() {
+    this.nextCard();
+    this.animateCard = 'rightOut';
 
-    setTimeout(() => {
-      // this.test = num === 1;
-      // this.test2 = num === 2;
-    }, 450);
+
   }
 
-  left(num: number) {
+  left() {
 
-
-
-    this.card1 = num === 1 ? 'leftOut' : '';
-    this.card2 = num === 2 ? 'leftOut' : '';
-    setTimeout(() => {
-      // this.test = num === 1;
-      // this.test2 = num === 2;
-    }, 450);
+    this.nextCard();
+    this.animateCard = 'leftOut';
   }
 
-  reset(num: number) {
-    this.card1 = num === 1 ? 'endBack' : '';
-    this.card2 = num === 2 ? 'endBack' : '';
+  nextCard() {
+    const cards = this.cards;
+    cards.push(cards.shift());
+    this.cards = cards;
+
+  }
+  report(e) {
+    console.log(e);
+
+  }
+
+  send(num: number) {
+    const cards = this.cards;
+    cards.splice(num,1);
+    this.cards = cards;
+    this.animateCard = 'sendOut';
   }
 
 }
+

@@ -1,12 +1,13 @@
 @import '../../../styles.scss';
 
 .mobile-container {
-  width: 100vw;
-  height: 100vh;
+  width: calc(100vw - 50px);
+  height: calc(100vh - 50px);
   padding: 25px;
   display: flex;
-  ;
+  overflow:none;
   flex-direction: column;
+  touch-action: none;
 }
 
 .header {
@@ -24,7 +25,6 @@
   justify-self: center;
   position: absolute;
   border-radius: 15px;
-  z-index: 20;
 }
 
 p {
@@ -66,4 +66,14 @@ button:hover {
 
 mat-card-actions {
   margin: auto auto 0 auto
+}
+
+.under-card{
+  z-index: 0;
+}
+.first-card{
+  z-index: 100;
+}
+.second-card{
+  z-index: 0;
 }
