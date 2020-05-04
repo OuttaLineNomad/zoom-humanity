@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "zoom-humanity": {
+      "hosting": {
+        "zoom-humanity": [
+          "zoom-humanity"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "zoom-humanity"
+  }
+}

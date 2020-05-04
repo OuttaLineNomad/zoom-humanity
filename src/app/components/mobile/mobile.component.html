@@ -1,0 +1,46 @@
+<div class="mobile-container">
+  <div class="header">
+    {{username}} Your score is {{score}}
+  </div>
+
+  <div>
+    <mat-card class="card paper">
+      <mat-card-content>
+        <p>
+          The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan.
+          A small, agile dog that copes very well with mountainous terrain, the Shiba Inu was originally
+          bred for hunting.
+        </p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button>SEND</button>
+        <button mat-button >NEXT</button>
+      </mat-card-actions>
+    </mat-card>
+  <mat-card  [@card]="card2" (@card.done)="reset(2)" *ngIf="!test2" class="card">
+    <mat-card-content>
+      <p>
+        The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan.
+        A small, agile dog that copes very well with mountainous terrain, the Shiba Inu was originally
+        bred for hunting.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button (click)="left(2)">SEND</button>
+      <button mat-button (click)="right(2)">NEXT</button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card [@card]="card1" (@card.done)="reset(1)" *ngIf="!test" class="card" ngClass >
+    <mat-card-content>
+      <p>
+       THISIS:LFDJ:LJSD:LFJ
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button  (click)="left(1)">SEND</button>
+      <button mat-button (click)="right(1)">NEXT</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+</div>

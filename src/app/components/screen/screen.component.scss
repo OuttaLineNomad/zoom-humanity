@@ -1,0 +1,110 @@
+@import '../../../styles.scss';
+
+.against-screen {
+  color: white;
+  display: grid;
+  grid-template-columns:25vw repeat(auto-fit, minmax(auto, 35vw));
+  height: 100%;
+  column-gap: 1vw;
+}
+
+
+#happy {
+  font-weight: bold;
+  font-size: 2.5em;
+  grid-column-start: 1;
+  grid-row-start: 1;
+  margin-top: 15px;
+  margin-left: 15px;
+
+  p {
+    margin-bottom: 10px;
+    line-height: initial;
+  }
+}
+
+.button-contain {
+  grid-column-start: 1;
+  grid-row-start: 1;
+  margin-top: auto;
+  margin-left:15px;
+  margin: auto 0 25px 15px;
+
+  button {
+    background-color: $CAH-black;
+    color: white;
+    padding: 5px 15px;
+    height: 45%;
+    border: solid 1px white;
+    box-shadow: inset 0 -4px 0 0 white;
+    border-radius: 10px;
+    font-size: 3em;
+  }
+
+  button:hover {
+    background-color: #353535;
+  }
+}
+
+.card {
+  font-size: 4.5vh;
+  padding: 15px;
+  border: solid 1px white;
+  box-shadow: inset -5px -4px 0 0 white;
+  height: 85vh;
+  margin: auto 0 25px 0;
+  word-wrap: break-word;
+  grid-column-start:2;
+  border-radius: 10px;
+  width:75vh;
+  white-space: pre-line;
+  line-height: initial;
+}
+
+.score-board {
+  grid-column-start: 3;
+  grid-row-start: 1;
+  color: white !important;
+  box-shadow: inset 0 -4px 0 0 white;
+  border-radius: 10px;
+
+  margin: auto 0 25px 0;
+}
+
+mat-list {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 85vh;
+  scrollbar-color: $CAH-black white;
+  scrollbar-width: thin;
+}
+
+#scoreboard {
+  margin-bottom: 5px;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  // box-shadow: inset 0 0 5px white;
+  border-radius: 10px;
+  border: solid 1px white;
+  background-color: white;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: $CAH-black;
+  border-radius: 10px;
+  border: solid 1px white
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #353535;
+}
+

@@ -1,0 +1,69 @@
+@import '../../../styles.scss';
+
+.mobile-container {
+  width: 100vw;
+  height: 100vh;
+  padding: 25px;
+  display: flex;
+  ;
+  flex-direction: column;
+}
+
+.header {
+  height: 9vh;
+  color: white;
+  font-weight: bold;
+  font-size: 3vh;
+}
+
+.card {
+  width: 75vw;
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-self: center;
+  position: absolute;
+  border-radius: 15px;
+  z-index: 20;
+}
+
+p {
+  font-size: 3vh;
+  word-wrap: break-word;
+}
+
+.paper {
+  background: #fff;
+  box-shadow:
+    /* The top layer shadow */
+    0 -1px 1px rgba(0, 0, 0, 0.15),
+    /* The second layer */
+    0 -10px 0 -5px #eee,
+    /* The second layer shadow */
+    0 -10px 1px -4px rgba(0, 0, 0, 0.15),
+    /* The third layer */
+    0 -20px 0 -10px #eee,
+    /* The third layer shadow */
+    0 -20px 1px -9px rgba(0, 0, 0, 0.15);
+  border-radius: 15px;
+}
+
+
+button {
+  background-color: white;
+  color: $CAH-black;
+  padding: 5px 15px;
+  border: solid 1px $CAH-black;
+  box-shadow: inset 0 -4px 0 0 $CAH-black;
+  border-radius: 8px;
+  font-size: 3vh;
+
+}
+
+button:hover {
+  background-color: #dddcdc;
+}
+
+mat-card-actions {
+  margin: auto auto 0 auto
+}
