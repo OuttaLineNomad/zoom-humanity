@@ -1,25 +1,3 @@
-
-export interface BlackCard {
-  text: string;
-  pick: number;
-}
-
-export interface Box {
-  name: string;
-  black: number[];
-  white: number[];
-  icon: number;
-}
-
-export interface RootObject {
-  blackCards: BlackCard[];
-  whiteCards: string[];
-  order: string[];
-}
-
-
-
-
 export const all = {
   "blackCards": [
     {

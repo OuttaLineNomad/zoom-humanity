@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { transition, trigger, style, animate } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, mergeMap, map, pluck, flatMap, filter, mapTo, reduce } from 'rxjs/operators';
-import { AngularFireDatabase } from '@angular/fire/database';
-import { all, RootObject, BlackCard } from 'src/app/decks';
+import { take } from 'rxjs/operators';
+import { FirebaseService } from 'src/app/service/firebase.service';
 
 @Component({
   selector: 'app-home',
@@ -64,15 +63,15 @@ export class HomeComponent implements OnInit {
   titles = {
     rr: 'Rocky Robbie Edition',
     dt: 'Dirty Turney Edition',
-    ca: `Cowlicks Alex Edition`,
+    nn: 'Naughty Nataly Edition'
   };
 
   isMobile: boolean;
 
   constructor(
     private route: ActivatedRoute,
-    private af: AngularFireDatabase,
-    private router: Router
+    private afs: FirebaseService,
+    private router: Router,
   ) { }
 
   ngOnInit(): void {
@@ -83,18 +82,15 @@ export class HomeComponent implements OnInit {
     });
 
 
-    this.isMobile = /Android|iPhone/i.test(navigator.userAgent);
-    console.log(`is mobile ${this.isMobile}`);
+    this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
+    if (this.isMobile) {
+      this.router.navigateByUrl(`/mobile/${this.edition}`);
+    }
   }
 
   playGame() {
     const code = this.makeRandom();
-    this.af.object<RootObject>('/decks').valueChanges().pipe(
-      map(f => {
-        return { whiteCards: f.whiteCards, blackCards: f.blackCards.filter(card => card.pick === 1) };
-      }),
-      map(decks => this.af.object(`/games/${code}/decks`).set(decks))
-    ).subscribe(resp => {
+    this.afs.createGame(code).subscribe(resp => {
       resp.then(() => this.router.navigate(['observer', code])).catch(err => console.log(err));
     });
   }
@@ -106,10 +102,6 @@ export class HomeComponent implements OnInit {
       code += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return code;
-  }
-
-  setDecks() {
-    this.af.object('/decks').set(all);
   }
 
 }

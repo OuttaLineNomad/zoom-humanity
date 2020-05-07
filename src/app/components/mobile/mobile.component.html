@@ -1,35 +1,23 @@
 <div class="mobile-container">
   <div class="header">
-    {{username}} Your score is {{score}}
+    {{msg}}
   </div>
 
   <div *ngFor="let c of cards; let i = index">
-    <!-- <mat-card class="card paper" style="z-index: 0;">
-      <mat-card-content>
-        <p>
-          The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan.
-          A small, agile dog that copes very well with mountainous terrain, the Shiba Inu was originally
-          bred for hunting.
-        </p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-button>SEND</button>
-        <button mat-button >NEXT</button>
-      </mat-card-actions>
-    </mat-card> -->
-  <mat-card [@card]="i === 0? animateCard: ''" (@card.done)="report($event)"class="card paper"
+  <mat-card [@card]="i === 0? animateCard: ''" class="card paper"
   (swipeRight)="right()"
   (swipeLeft)="left()"
   (swipeUp)="send(i)"
-   ngClass="{'first-card': i === 0,'second-card': i === 1, 'under-cards': i > 2}">
+  [ngClass]="{'uno': cards.length === 1}"
+ >
     <mat-card-content>
       <p>
         {{c}}
       </p>
     </mat-card-content>
-    <mat-card-actions>
+    <mat-card-actions *ngIf="!isMobile">
       <button mat-button (click)="send(i)">SEND</button>
-      <button mat-button (click)="right()">NEXT {{i}}</button>
+      <button mat-button (click)="right()">NEXT</button>
     </mat-card-actions>
   </mat-card>
 
