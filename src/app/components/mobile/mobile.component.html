@@ -3,23 +3,36 @@
     {{msg}}
   </div>
 
-  <div *ngFor="let c of cards; let i = index">
-  <mat-card [@card]="i === 0? animateCard: ''" class="card paper"
-  (swipeRight)="right()"
-  (swipeLeft)="left()"
-  (swipeUp)="send(i)"
-  [ngClass]="{'uno': cards.length === 1}"
- >
-    <mat-card-content>
-      <p>
-        {{c}}
-      </p>
-    </mat-card-content>
-    <mat-card-actions *ngIf="!isMobile">
-      <button mat-button (click)="send(i)">SEND</button>
-      <button mat-button (click)="right()">NEXT</button>
-    </mat-card-actions>
-  </mat-card>
+  <div *ngIf="ready || !judge">
+    <div *ngFor="let c of cards; let i = index">
+      <mat-card [@card]="i === 0? animateCard: ''" class="card paper" (swipeRight)="right()" (swipeLeft)="left()"
+        (swipeUp)="send(i)" [ngClass]="{'uno': cards.length === 1, 'black': c.black}">
+        <mat-card-content>
+          <p [innerHTML]="c.text">
+            <!-- {{c.text}} -->
+          </p>
+        </mat-card-content>
+        <mat-card-actions *ngIf="!isMobile">
+          <button mat-button (click)="send(i)">SEND</button>
+          <button mat-button (click)="right()">NEXT</button>
+        </mat-card-actions>
+      </mat-card>
 
-</div>
+    </div>
+  </div>
+  <div *ngIf="!ready && judge">
+    <div *ngFor="let c of cards; let i = index">
+      <mat-card [@card]="i === 0? animateCard: ''" class="card paper" [ngClass]="{'uno': cards.length === 1, 'black': c.black}">
+        <mat-card-content>
+          <p>
+           Are you ready to judge?
+          </p>
+        </mat-card-content>
+        <mat-card-actions >
+          <button mat-button (click)="send(-1)">Ready</button>
+        </mat-card-actions>
+      </mat-card>
+
+    </div>
+  </div>
 </div>

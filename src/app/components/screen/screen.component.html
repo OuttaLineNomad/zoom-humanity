@@ -9,9 +9,18 @@
     <button  *ngIf="started" (click)="endGame()">End Game</button>
   </div>
 
-    <div class="card">
-      {{bCard}}
+    <div class="card" [innerHTML]="bCard">
+      <!-- {{bCard}} -->
     </div>
+    <div class="card white" @wCard *ngIf="wCard">
+      <div [innerHTML]="wCard"></div>
+      <div style="margin-top: 27vh;">
+        {{winner}} is the winner!
+      </div>
+      <!-- {{bCard}} -->
+    </div>
+
+
     <div class="score-board">
       <div style="font-size: 2.5vh;" id="scoreboard" >Scoreboard</div>
       <mat-list>

@@ -1,15 +1,30 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { take } from 'rxjs/operators';
+import { take, map, mergeMap } from 'rxjs/operators';
 import { trigger, transition, style, animate, state } from '@angular/animations';
+import { FirebaseService, BlackCard } from 'src/app/service/firebase.service';
+import { of } from 'rxjs';
 
+export interface PlayerScore {
+  name: string;
+  score: number;
+}
 @Component({
   selector: 'app-screen',
   templateUrl: './screen.component.html',
   styleUrls: ['./screen.component.scss'],
   animations: [
     trigger('code', [
+      transition(':enter', [
+        style({ transform: 'translateY(1000%)' }),
+        animate('300ms', style({ transform: 'translateY(800%)' })),
+        animate('700ms', style({ transform: 'translateY(0%)' })),
+        animate('200ms', style({ transform: 'translateY(10%)' })),
+        animate('100ms', style({ transform: 'translateY(0%)' }))
+      ]),
+    ]),
+    trigger('wCard', [
       transition(':enter', [
         style({ transform: 'translateY(1000%)' }),
         animate('300ms', style({ transform: 'translateY(800%)' })),
@@ -54,73 +69,114 @@ export class ScreenComponent implements OnInit {
   qrCode: string;
   bCard: string;
 
-  users= [
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-    {name:'naughty nat', score: 12},
-    {name:'bryce', score:0},
-  ]
+  users: PlayerScore[];
+  players: string[];
+  currentJudge = 0;
+  winner: string;
+  wCard: string;
 
   constructor(
     private route: ActivatedRoute,
-    private af: AngularFireDatabase,
+    private afs: FirebaseService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    this.route.params.pipe(take(1)).subscribe(params => {
-      this.code = params.id;
-      this.qrCode = `http://192.168.1.14:4200/${this.code}`;
+    this.route.params.pipe(
+      take(1),
+      mergeMap(params => {
+        this.code = params.id;
+        this.qrCode = `http://192.168.1.14:4200/${this.code}`;
+        return this.afs.getPlayers(params.id);
+      })
+    ).subscribe(players => {
+      console.log(players);
+
+      this.players = players.map(player => player.playerName);
+      this.users = players.map(player => {
+        console.log('player == ', player);
+
+        let score = 0;
+        if (player.blackCards !== undefined) {
+          score = this.getBlackScore(player.blackCards).length;
+        }
+        return { name: player.playerName, score };
+      }).sort((a, b) => a.score < b.score ? -1 : a.score > b.score ? 1 : 0);
+
     });
 
+    const started = localStorage.getItem('started');
+    if (started === 'true') {
+      console.log('started');
+
+      this.startGame(true);
+    }
 
     this.isMobile = /Android|iPhone/i.test(navigator.userAgent);
     console.log(`is mobile ${this.isMobile}`);
+
   }
 
-  startGame() {
+  getBlackScore(data: { [key: string]: BlackCard }): BlackCard[] {
+    const cards = [];
+    for (const card in data) {
+      if (data.hasOwnProperty(card)) {
+        cards.push(card);
+      }
+    }
+    return cards;
+  }
+
+  startGame(restart: boolean = false) {
+    if (!restart) {
+      this.afs.setJudge(this.players[this.currentJudge], this.code).subscribe(() => console.log('start Game with set judge'));
+      this.afs.okSend(this.code, this.players);
+      this.afs.drawHands(this.users.length, this.code).pipe(
+        take(1)).subscribe(hands => {
+          const ok = this.users.map(player => player.name);
+          this.afs.dealHands(hands, ok, this.code);
+        });
+    }
+
+    this.afs.getJudge(this.code).subscribe(j => {
+      if (j.ready) {
+        this.bCard = j.blackCard.text.replace('_', '_____');
+        this.winner = '';
+        this.wCard = '';
+        if (j.whiteCards !== undefined) {
+          console.log('white cards in');
+
+          if (j.whiteCards.length === (this.players.length - 1)) {
+            console.log('white cards in and players in');
+            this.afs.allIn(this.code).catch(err => console.error(err));
+          }
+        }
+      }
+      if (j.done) {
+        this.currentJudge += 1;
+        if (this.currentJudge > (this.players.length - 1)) {
+          this.currentJudge = 0;
+        }
+        this.wCard = j.winner.text;
+        this.winner = j.winner.playerName;
+        this.afs.setJudge(this.players[this.currentJudge], this.code).subscribe(() => console.log('start another Game with set judge'));
+        this.afs.okSend(this.code, this.players);
+      }
+    });
+
+    localStorage.setItem('started', 'true');
     this.started = true;
-    this.bCard = "The top Google auto-complete results for \"Barack Obama\":\n- Barack Obama Height.\n- Barack Obama net worth.\n- Barack Obama _.\"";
   }
+
   endGame() {
-
-
+    this.afs.endGame(this.code).then(() => {
+      this.router.navigateByUrl('/');
+    });
+    this.started = false;
   }
 
   nextCard() {
-
+    this.afs.setJudge(this.players[this.currentJudge], this.code).subscribe(() => console.log('start Game with set judge'));
   }
 
 }

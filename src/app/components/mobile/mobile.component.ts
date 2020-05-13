@@ -1,7 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { trigger, transition, style, state, animate } from '@angular/animations';
-import { FirebaseService, Player, Judge } from 'src/app/service/firebase.service';
+import { FirebaseService, Player, Judge, BlackCard } from 'src/app/service/firebase.service';
+import { take, mergeMap } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 
+
+export interface HandCards {
+  text: string;
+  black?: boolean;
+  playerName?: string;
+}
 @Component({
   selector: 'app-mobile',
   templateUrl: './mobile.component.html',
@@ -45,31 +53,87 @@ export class MobileComponent implements OnInit {
   trigger: string;
   isMobile: boolean;
   msg: string;
-  judge: Judge;
+  judge: boolean = true;
+  ready: boolean = false;
+  bCard: string;
 
-  cards: string[];
+  @Input() playerName: string;
+  @Input() code: string;
+
+  cards: HandCards[] = [{ text: '' }];
   constructor(
     private afs: FirebaseService,
   ) { }
 
   ngOnInit(): void {
-    this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     window.scroll(0, 0);
+    this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
+    this.setUpData(this.code, this.playerName);
+  }
 
-    this.afs.getPlayer().subscribe(player => {
+  setUpData(code: string, playerName: string) {
+    this.afs.getPlayer(code, playerName).subscribe(player => {
+      this.msg = `Hello ${player.playerName}, just waiting for all your slow friends to catch up. `;
       this.player = player;
-      this.cards = player.whiteCards;
-      this.judge = player.judge;
+      if (this.judge) {
+        return;
+      }
+      if (player.whiteCards === undefined) {
+        return;
+      }
+      this.cards = player.whiteCards.map(text => {
+        return { text, black: false };
+      });
 
       if (this.cards.length > 0) {
-        this.msg = `${player.playerName} you got ${player.score} in the bag.`;
+        let score = 0;
+        if (player.blackCards !== undefined) {
+          score = this.getBlackScore(player.blackCards).length;
+          console.log('score ===', score);
+        }
+        this.msg = `${player.playerName} you got ${score} in the bag.`;
       }
     });
 
+    this.afs.getJudge(code).subscribe(judge => {
+      if (judge.judgeName === this.player.playerName) {
+        this.judge = true;
+        this.bCard = judge.blackCard.text;
+        this.cards = [{ text: judge.blackCard.text.replace('_', '____'), black: true }];
 
-    this.msg = `Hello ${this.player.playerName}, just waiting for all your slow friends to catch up. `;
+        if (judge.allIn) {
+          const addCards = judge.whiteCards.map(card => {
+            return { text: card.whiteCard, black: false, playerName: card.player };
+          });
+          this.cards.push(...addCards);
+        }
+        this.msg = `${this.player.playerName} you are in charge pick a funny one.`;
+        return;
+      }
+
+      this.judge = false;
+      if (this.player.whiteCards === undefined) {
+        return;
+      }
+      this.cards = this.player.whiteCards.map(text => {
+        return { text, black: false };
+      });
+
+      if (this.cards.length > 0) {
+        this.msg = `${this.player.playerName} you got ${this.player.score} in the bag.`;
+      }
+    });
   }
 
+  getBlackScore(data: { [key: string]: BlackCard }): BlackCard[] {
+    const cards = [];
+    for (const card in data) {
+      if (data.hasOwnProperty(card)) {
+        cards.push(card);
+      }
+    }
+    return cards;
+  }
 
   right() {
     if (this.cards.length !== 1) {
@@ -80,7 +144,7 @@ export class MobileComponent implements OnInit {
 
   left() {
     if (this.cards.length !== 1) {
-      this.nextCard();
+      this.nextCardL();
       this.animateCard = 'leftOut';
     }
   }
@@ -91,8 +155,28 @@ export class MobileComponent implements OnInit {
     this.cards = cards;
   }
 
+  nextCardL() {
+    const cards = this.cards;
+    cards.unshift(cards.pop());
+    this.cards = cards;
+  }
+
   send(num: number) {
+    if (num === -1) {
+      this.afs.ready(this.code);
+      this.animateCard = 'sendOut';
+      setTimeout(() => {
+        this.animateCard = '';
+        this.ready = true;
+      }, 100);
+      return;
+    }
     if (!this.player.send) {
+      return;
+    }
+    this.player.send = false;
+    if (this.cards[num].black) {
+      this.player.send = true;
       return;
     }
     // animate this stuff
@@ -100,17 +184,49 @@ export class MobileComponent implements OnInit {
     const card = cards.splice(num, 1);
     this.cards = cards;
     this.animateCard = 'sendOut';
+
+    console.log("sending");
+
     setTimeout(() => {
       this.animateCard = '';
-    }, 400);
+    }, 100);
     // done animating
-
-    this.afs.sendCard(card[0]).subscribe(result => {
-      result.then(() => {
-        this.player.send = false;
-      }).catch(() => {
+    if (this.judge) {
+      this.afs.sendWinner(card[0], this.bCard, this.code).then(() => {
+        this.player.send = true;
+        this.ready = false;
+      }).catch((err) => {
+        console.log(err);
+        this.player.send = true;
         this.cards.push(card[0]);
-      })
+      });
+      return;
+    }
+
+    const hand = cards.map(oneCard => oneCard.text);
+
+    this.afs.sendCard(card[0].text, this.code, this.playerName).subscribe(result => {
+      result.then(() => {
+        console.log('New Card');
+
+        this.afs.drawCard(this.code).pipe(
+          take(1),
+          mergeMap(text => {
+            console.log(text);
+
+            hand.push(text);
+            // this.cards.push({ text, black: false });
+            return this.afs.setHand(hand, this.code, this.playerName);
+          })
+        ).subscribe(() => {
+          console.log('updated had');
+          this.player.send = true;
+        });
+      }).catch((err) => {
+        console.error(err);
+        this.player.send = true;
+        this.cards.push(card[0]);
+      });
     });
   }
 

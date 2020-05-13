@@ -90,8 +90,8 @@ export class HomeComponent implements OnInit {
 
   playGame() {
     const code = this.makeRandom();
-    this.afs.createGame(code).subscribe(resp => {
-      resp.then(() => this.router.navigate(['observer', code])).catch(err => console.log(err));
+    this.afs.createGame(code).subscribe(() => {
+      this.router.navigate(['screen', code]);
     });
   }
 

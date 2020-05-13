@@ -11,7 +11,6 @@ const routes: Routes = [
   {path: ':id', component: HomeComponent},
   {path: 'screen/:id', component: ScreenComponent},
   {path: 'mobile/:id', component: WelcomeComponent},
-  {path: 'mobile/:id/play', component: MobileComponent},
 ];
 
 @NgModule({

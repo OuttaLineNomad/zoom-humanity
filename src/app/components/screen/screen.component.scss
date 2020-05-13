@@ -46,7 +46,16 @@
   }
 }
 
+.white {
+  background-color: white !important;
+  color: $CAH-black !important;
+  height: 48vh !important;
+  margin: auto auto 10px 20px !important;
+}
+
+
 .card {
+  grid-row-start: 1;
   font-size: 4.5vh;
   padding: 15px;
   border: solid 1px white;
