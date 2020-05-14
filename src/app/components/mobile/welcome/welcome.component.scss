@@ -1,0 +1,80 @@
+@import '../../../../styles.scss';
+
+.against-welcome {
+  color: white;
+  display: grid;
+  grid-template-columns: 10vw repeat(auto-fit, minmax(250px, 25vw));
+  grid-template-rows: repeat(6, 1fr);
+  height: 100vh;
+  width: 100vw;
+  touch-action: none;
+}
+
+
+.title {
+  font-weight: bold;
+  font-size: 4em;
+  grid-column-start: 2;
+  grid-row-start: 1;
+  margin-top: 2vh;
+
+  p {
+    margin: 0;
+    padding: 0;
+    line-height: initial;
+  }
+}
+
+#happy {
+  font-weight: bold;
+  font-size: 2.5em;
+  grid-column-start: 2;
+  grid-row-start: 3;
+  grid-column-end: 4;
+  margin-top: 10px;
+}
+
+.button-contain {
+  grid-column-start: 2;
+  grid-row-start: 4;
+  margin: auto;
+
+  button {
+    background-color: $CAH-black;
+    color: white;
+    padding: 5px 15px;
+    height: 45%;
+    border: solid 1px white;
+    box-shadow: inset 0 -4px 0 0 white;
+    border-radius: 10px;
+    font-size: 3em;
+  }
+
+  button:hover {
+    background-color: #353535;
+  }
+}
+
+form {
+  grid-column-start: 2;
+  grid-row-start: 2;
+  display: flex;
+  flex-direction: column;
+
+  input {
+    width: 25vw;
+    border: none;
+    background-color: lightgray;
+    font-weight: bold;
+    font-size: 2vh;
+    height: 3vh;
+    margin: 10px 0;
+    padding-left: 10px;
+  }
+
+  label {
+    font-size: 3vh;
+  }
+}
+
+

@@ -1,0 +1,23 @@
+<div *ngIf="!signedIn" class="against-welcome">
+  <div class="title">
+    <p @zoom>Zoom</p>
+    <p @against>Against</p>
+    <p @humanity>Humanity</p>
+  </div>
+
+
+  <form #f="ngForm" @button>
+    <p *ngIf="msg">{{msg}}</p>
+    <label for="code">Game Code</label>
+    <input [(ngModel)]="code" name="code" type="text" required>
+    <label for="name">Player Name</label>
+    <input [(ngModel)]="name" name="name" type="text" required>
+  </form>
+
+
+  <div class="button-contain">
+    <button type="submit"  @button (click)="playGame(f)">Play Game</button>
+  </div>
+</div>
+
+<app-mobile [code]="code" [playerName]="name" *ngIf="signedIn" ></app-mobile>
