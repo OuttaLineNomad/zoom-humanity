@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  uri:'http://192.168.1.14:4200/',
   firebase: {
     apiKey: 'AIzaSyAC2L9bAsep0uz__w0AlcaWSYsTBnCmIPE',
     authDomain: 'zoom-humanity.firebaseapp.com',

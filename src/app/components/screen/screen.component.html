@@ -5,12 +5,16 @@
   </div>
   <div class="button-contain">
     <button *ngIf="!started" @button (click)="startGame()">Start Game</button>
-    <button *ngIf="started" style="margin-bottom: 10px;" (click)="nextCard()">Next Card</button>
+    <button *ngIf="started && ready" style="margin-bottom: 10px;" (click)="nextCard()">Next Card</button>
     <button  *ngIf="started" (click)="endGame()">End Game</button>
   </div>
 
-    <div class="card" [innerHTML]="bCard">
-      <!-- {{bCard}} -->
+    <div class="card" [innerHTML]="bCard" *ngIf="bCard">
+    </div>
+    <div class="card" *ngIf="!bCard">
+      With your smartphone scan code or go to {{codeURI}}
+      <br><br> On your phone to swipe right for next card, and left for previous
+      <br><br> To choose send a card to the judge or to pick wining card swipe up.
     </div>
     <div class="card white" @wCard *ngIf="wCard">
       <div [innerHTML]="wCard"></div>

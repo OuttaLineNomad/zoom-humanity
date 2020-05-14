@@ -5,6 +5,7 @@ import { take, map, mergeMap } from 'rxjs/operators';
 import { trigger, transition, style, animate, state } from '@angular/animations';
 import { FirebaseService, BlackCard } from 'src/app/service/firebase.service';
 import { of } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 export interface PlayerScore {
   name: string;
@@ -68,6 +69,8 @@ export class ScreenComponent implements OnInit {
   started: boolean;
   qrCode: string;
   bCard: string;
+  codeURI: string;
+  ready: boolean;
 
   users: PlayerScore[];
   players: string[];
@@ -82,11 +85,13 @@ export class ScreenComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+
     this.route.params.pipe(
       take(1),
       mergeMap(params => {
         this.code = params.id;
-        this.qrCode = `http://192.168.1.14:4200/${this.code}`;
+        this.codeURI = `${environment.uri}${this.code}`;
+        this.qrCode = `${this.codeURI}`;
         return this.afs.getPlayers(params.id);
       })
     ).subscribe(players => {
@@ -103,14 +108,12 @@ export class ScreenComponent implements OnInit {
         return { name: player.playerName, score };
       }).sort((a, b) => a.score < b.score ? -1 : a.score > b.score ? 1 : 0);
 
+      this.started = localStorage.getItem(`started:${this.code}`) === 'true';
+      if (this.started) {
+        console.log('started');
+        this.startGame(true);
+      }
     });
-
-    const started = localStorage.getItem('started');
-    if (started === 'true') {
-      console.log('started');
-
-      this.startGame(true);
-    }
 
     this.isMobile = /Android|iPhone/i.test(navigator.userAgent);
     console.log(`is mobile ${this.isMobile}`);
@@ -140,6 +143,7 @@ export class ScreenComponent implements OnInit {
 
     this.afs.getJudge(this.code).subscribe(j => {
       if (j.ready) {
+        this.ready = true;
         this.bCard = j.blackCard.text.replace('_', '_____');
         this.winner = '';
         this.wCard = '';
@@ -164,7 +168,7 @@ export class ScreenComponent implements OnInit {
       }
     });
 
-    localStorage.setItem('started', 'true');
+    localStorage.setItem(`started:${this.code}`, 'true');
     this.started = true;
   }
 

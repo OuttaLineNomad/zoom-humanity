@@ -2,7 +2,6 @@ import { Component, OnInit, Input } from '@angular/core';
 import { trigger, transition, style, state, animate } from '@angular/animations';
 import { FirebaseService, Player, Judge, BlackCard } from 'src/app/service/firebase.service';
 import { take, mergeMap } from 'rxjs/operators';
-import { ActivatedRoute, Router } from '@angular/router';
 
 
 export interface HandCards {
@@ -53,9 +52,10 @@ export class MobileComponent implements OnInit {
   trigger: string;
   isMobile: boolean;
   msg: string;
-  judge: boolean = true;
-  ready: boolean = false;
+  judge: boolean;
+  ready: boolean;
   bCard: string;
+  endGame: boolean;
 
   @Input() playerName: string;
   @Input() code: string;
@@ -73,6 +73,14 @@ export class MobileComponent implements OnInit {
 
   setUpData(code: string, playerName: string) {
     this.afs.getPlayer(code, playerName).subscribe(player => {
+      if (player === null) {
+        console.log('Game ended');
+        this.cards = [{ text: 'end' }];
+        localStorage.removeItem(`player:${this.code}`);
+        this.msg = 'The game has ended, go home!';
+        this.endGame = true;
+        return;
+      }
       this.msg = `Hello ${player.playerName}, just waiting for all your slow friends to catch up. `;
       this.player = player;
       if (this.judge) {
@@ -96,6 +104,9 @@ export class MobileComponent implements OnInit {
     });
 
     this.afs.getJudge(code).subscribe(judge => {
+      if(judge === null){
+        return;
+      }
       if (judge.judgeName === this.player.playerName) {
         this.judge = true;
         this.bCard = judge.blackCard.text;
