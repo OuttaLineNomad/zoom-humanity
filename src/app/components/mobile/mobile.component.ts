@@ -99,12 +99,12 @@ export class MobileComponent implements OnInit {
           score = this.getBlackScore(player.blackCards).length;
           console.log('score ===', score);
         }
-        this.msg = `${player.playerName} you got ${score} Black Cards.`;
+        this.msg = `${player.playerName} your score ${score}.`;
       }
     });
 
     this.afs.getJudge(code).subscribe(judge => {
-      if(judge === null){
+      if (judge === null) {
         return;
       }
       if (judge.judgeName === this.player.playerName) {
@@ -131,7 +131,7 @@ export class MobileComponent implements OnInit {
       });
 
       if (this.cards.length > 0) {
-        this.msg = `${this.player.playerName} you got ${this.player.score} in the bag.`;
+        this.msg = `${this.player.playerName} your score ${this.player.score} `;
       }
     });
   }
