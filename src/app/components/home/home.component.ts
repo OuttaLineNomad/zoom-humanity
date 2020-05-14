@@ -84,6 +84,9 @@ export class HomeComponent implements OnInit {
 
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     if (this.isMobile) {
+      if (this.edition === undefined || this.edition === 'mobile') {
+        return;
+      }
       this.router.navigateByUrl(`/mobile/${this.edition}`);
     }
   }

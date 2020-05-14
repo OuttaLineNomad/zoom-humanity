@@ -99,7 +99,7 @@ export class MobileComponent implements OnInit {
           score = this.getBlackScore(player.blackCards).length;
           console.log('score ===', score);
         }
-        this.msg = `${player.playerName} you got ${score} in the bag.`;
+        this.msg = `${player.playerName} you got ${score} Black Cards.`;
       }
     });
 
@@ -118,7 +118,7 @@ export class MobileComponent implements OnInit {
           });
           this.cards.push(...addCards);
         }
-        this.msg = `${this.player.playerName} you are in charge pick a funny one.`;
+        this.msg = `${this.player.playerName} you're in charge.`;
         return;
       }
 

@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AngularFireDatabase } from '@angular/fire/database';
-import { take, map, mergeMap } from 'rxjs/operators';
+import { take, mergeMap } from 'rxjs/operators';
 import { trigger, transition, style, animate, state } from '@angular/animations';
 import { FirebaseService, BlackCard } from 'src/app/service/firebase.service';
-import { of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface PlayerScore {
@@ -180,7 +178,7 @@ export class ScreenComponent implements OnInit {
   }
 
   nextCard() {
-    this.afs.setJudge(this.players[this.currentJudge], this.code).subscribe(() => console.log('start Game with set judge'));
+    this.afs.setJudge(this.players[this.currentJudge], this.code, true).subscribe(() => console.log('start Game with set judge'));
   }
 
 }

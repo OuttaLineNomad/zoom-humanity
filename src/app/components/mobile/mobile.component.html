@@ -1,7 +1,8 @@
 <div class="mobile-container">
   <div class="header">
-    {{msg}}<br> game code is <span style="color: #de1738">
-      {{code}}</span>
+    <p style="margin-bottom: 15px;">{{msg}}</p>
+    <p>game code <span style="color: #de1738">
+      {{code}}</span></p>
   </div>
 
   <div *ngIf="(ready || !judge) && !endGame">
