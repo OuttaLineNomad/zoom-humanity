@@ -13,8 +13,8 @@
     </div>
     <div class="card" *ngIf="!bCard">
       With your smartphone scan code or go to {{codeURI}}
-      <br><br> On your phone to swipe right for next card, and left for previous
-      <br><br> To choose send a card to the judge or to pick wining card swipe up.
+      <br><br> On your phone swipe right for next card, and left for previous
+      <br><br> To send a card to the judge or to pick wining card swipe up.
     </div>
     <div class="card white" @wCard *ngIf="wCard">
       <div [innerHTML]="wCard"></div>
