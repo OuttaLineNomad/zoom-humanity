@@ -2,38 +2,41 @@
   <div id="happy">
     <p @code>{{code}}</p>
     <qrcode @qr [level]="1" [qrvalue]="qrCode"></qrcode>
+    <p style="margin-top: 20px;">The judge is {{judgeName}}</p>
   </div>
   <div class="button-contain">
     <button *ngIf="!started" @button (click)="startGame()">Start Game</button>
     <button *ngIf="started && ready" style="margin-bottom: 10px;" (click)="nextCard()">Next Card</button>
-    <button  *ngIf="started" (click)="endGame()">End Game</button>
+    <button *ngIf="started" (click)="endGame()">End Game</button>
   </div>
 
-    <div class="card" [innerHTML]="bCard" *ngIf="bCard">
+  <div class="card" [innerHTML]="bCard" *ngIf="bCard">
+  </div>
+  <div class="card" *ngIf="!bCard">
+    With your smartphone scan code or go to {{codeURI}}
+    <br><br> On your phone swipe right for next card, and left for previous
+    <br><br> To send a card to the judge or to pick winning card swipe up.
+  </div>
+  <div class="card white" @wCard *ngIf="wCard">
+    <div [innerHTML]="wCard"></div>
+    <div style="margin-top: 27vh;">
+      {{winner}} is the winner!
     </div>
-    <div class="card" *ngIf="!bCard">
-      With your smartphone scan code or go to {{codeURI}}
-      <br><br> On your phone swipe right for next card, and left for previous
-      <br><br> To send a card to the judge or to pick winning card swipe up.
-    </div>
-    <div class="card white" @wCard *ngIf="wCard">
-      <div [innerHTML]="wCard"></div>
-      <div style="margin-top: 27vh;">
-        {{winner}} is the winner!
-      </div>
-      <!-- {{bCard}} -->
-    </div>
+    <!-- {{bCard}} -->
+  </div>
 
 
-    <div class="score-board">
-      <div style="font-size: 2.5vh;" id="scoreboard" >Scoreboard</div>
-      <mat-list>
+  <div class="score-board">
+    <div style="font-size: 2.5vh;" id="scoreboard">Scoreboard</div>
+    <mat-list>
 
-        <mat-list-item *ngFor="let user of users" style="color:white !important">
-          <div mat-line>{{user.name}}</div>
-          <div mat-line> {{user.score}} </div>
-        </mat-list-item>
-      </mat-list>
+      <mat-list-item *ngFor="let user of users" style="color:white !important">
+        <div mat-line>{{user.name}}</div>
+        <div mat-line> {{user.score}} </div>
+        <mat-icon *ngIf="user.send" aria-hidden="false" aria-label="cards sent to judge">check_circle</mat-icon>
+        <mat-icon *ngIf="user.judge" aria-hidden="false" aria-label="is judge">gavel</mat-icon>
+      </mat-list-item>
+    </mat-list>
 
-    </div>
+  </div>
 </div>

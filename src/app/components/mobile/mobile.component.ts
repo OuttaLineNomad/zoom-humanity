@@ -1,7 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { trigger, transition, style, state, animate } from '@angular/animations';
 import { FirebaseService, Player, Judge, BlackCard } from 'src/app/service/firebase.service';
-import { take, mergeMap } from 'rxjs/operators';
+import { take, mergeMap, flatMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 
 export interface HandCards {
@@ -56,11 +57,14 @@ export class MobileComponent implements OnInit {
   ready: boolean;
   bCard: string;
   endGame: boolean;
+  judgeSub: Subscription;
+  cardSent: boolean;
 
   @Input() playerName: string;
   @Input() code: string;
 
   cards: HandCards[] = [{ text: '' }];
+  playerHand: HandCards[] = [{ text: '' }];
   constructor(
     private afs: FirebaseService,
   ) { }
@@ -81,58 +85,69 @@ export class MobileComponent implements OnInit {
         this.endGame = true;
         return;
       }
-      this.msg = `Hello ${player.playerName}, just waiting for all your slow friends to catch up. `;
       this.player = player;
-      if (this.judge) {
-        return;
-      }
-      if (player.whiteCards === undefined) {
-        return;
-      }
-      this.cards = player.whiteCards.map(text => {
-        return { text, black: false };
-      });
+      this.cardSent = player.send;
+      console.log('play player', player);
+      console.log('play player ths ', this.player);
+      console.log('state of player ==================', player);
 
-      if (this.cards.length > 0) {
-        let score = 0;
-        if (player.blackCards !== undefined) {
-          score = this.getBlackScore(player.blackCards).length;
-          console.log('score ===', score);
+      if (player.judge) {
+        if (!this.judge) {
+          this.getJudge(code);
         }
-        this.msg = `${player.playerName} your score ${score}.`;
+      } else {
+        this.judge = false;
+        console.log('player had ==', player.whiteCards);
+        if (this.judgeSub) {
+          this.judgeSub.unsubscribe();
+        }
+
+        if (player.whiteCards === undefined) {
+          this.msg = `Hello ${player.playerName}, just waiting for all your slow friends to catch up. `;
+          return;
+        }
+        this.cards = player.whiteCards.map(text => {
+          return { text, black: false };
+        });
+
+        this.playerHand = this.cards;
+
+        if (this.cards.length > 0) {
+          let score = 0;
+          if (player.blackCards !== undefined) {
+            score = this.getBlackScore(player.blackCards).length;
+            console.log('score ===', score);
+          }
+          if (!this.cardSent) {
+            this.msg = `${player.playerName} your score ${score}.`;
+          } else {
+            this.msg = 'You sent a card to the judge.';
+          }
+          return;
+        }
       }
     });
 
-    this.afs.getJudge(code).subscribe(judge => {
-      if (judge === null) {
+
+  }
+
+  getJudge(code: string) {
+    this.judgeSub = this.afs.getJudge(code).subscribe(judge => {
+      if (judge === null || judge === undefined) {
         return;
       }
-      if (judge.judgeName === this.player.playerName) {
-        this.judge = true;
-        this.bCard = judge.blackCard.text;
-        this.cards = [{ text: judge.blackCard.text.replace('_', '____'), black: true }];
+      this.judge = true;
+      this.bCard = judge.blackCard.text;
+      this.cards = [{ text: judge.blackCard.text.replace('_', '____'), black: true }];
 
-        if (judge.allIn) {
-          const addCards = judge.whiteCards.map(card => {
-            return { text: card.whiteCard, black: false, playerName: card.player };
-          });
-          this.cards.push(...addCards);
-        }
-        this.msg = `${this.player.playerName} you're in charge.`;
-        return;
-      }
+      if (judge.allIn && judge.whiteCards !== undefined) {
+        const addCards = Object.keys(judge.whiteCards).map(key => {
+          return { text: judge.whiteCards[key].whiteCard, black: false, playerName: judge.whiteCards[key].player };
+        });
 
-      this.judge = false;
-      if (this.player.whiteCards === undefined) {
-        return;
+        this.cards.push(...addCards);
       }
-      this.cards = this.player.whiteCards.map(text => {
-        return { text, black: false };
-      });
-
-      if (this.cards.length > 0) {
-        this.msg = `${this.player.playerName} your score ${this.player.score} `;
-      }
+      this.msg = `${this.player.playerName} you're in charge.`;
     });
   }
 
@@ -182,12 +197,14 @@ export class MobileComponent implements OnInit {
       }, 100);
       return;
     }
-    if (!this.player.send) {
+    console.log('send player', this.cardSent);
+
+    if (this.cardSent) {
       return;
     }
-    this.player.send = false;
+    this.cardSent = true;
     if (this.cards[num].black) {
-      this.player.send = true;
+      this.cardSent = false;
       return;
     }
     // animate this stuff
@@ -196,19 +213,21 @@ export class MobileComponent implements OnInit {
     this.cards = cards;
     this.animateCard = 'sendOut';
 
-    console.log("sending");
-
     setTimeout(() => {
       this.animateCard = '';
     }, 100);
     // done animating
     if (this.judge) {
-      this.afs.sendWinner(card[0], this.bCard, this.code).then(() => {
-        this.player.send = true;
+      console.log('sending winner');
+
+      this.afs.sendWinner(card[0], this.bCard, this.code, this.playerName).then(() => {
+        console.log('sending winner 4444');
+
         this.ready = false;
+        this.judge = false;
       }).catch((err) => {
         console.log(err);
-        this.player.send = true;
+        this.cardSent = false;
         this.cards.push(card[0]);
       });
       return;
@@ -216,28 +235,25 @@ export class MobileComponent implements OnInit {
 
     const hand = cards.map(oneCard => oneCard.text);
 
-    this.afs.sendCard(card[0].text, this.code, this.playerName).subscribe(result => {
-      result.then(() => {
-        console.log('New Card');
+    this.afs.sendCard(card[0].text, this.code, this.playerName).then(() => {
+      console.log('New Card');
+      this.msg = 'Why did you send that one?';
+      this.afs.drawCard(this.code, 1).pipe(
+        take(1),
+        mergeMap(text => {
+          console.log(text);
 
-        this.afs.drawCard(this.code).pipe(
-          take(1),
-          mergeMap(text => {
-            console.log(text);
-
-            hand.push(text);
-            // this.cards.push({ text, black: false });
-            return this.afs.setHand(hand, this.code, this.playerName);
-          })
-        ).subscribe(() => {
-          console.log('updated had');
-          this.player.send = true;
-        });
-      }).catch((err) => {
-        console.error(err);
-        this.player.send = true;
-        this.cards.push(card[0]);
+          hand.push(text[0]);
+          // this.cards.push({ text, black: false });
+          return this.afs.setHand(hand, this.code, this.playerName);
+        })
+      ).subscribe(() => {
+        console.log('updated had');
       });
+    }).catch((err) => {
+      console.error(err);
+      this.cardSent = false;
+      this.cards.push(card[0]);
     });
   }
 

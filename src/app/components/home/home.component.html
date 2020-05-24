@@ -5,11 +5,10 @@
     <p @humanity>Humanity</p>
   </div>
   <p id="happy" @happy>{{edition}}</p>
-
   <div class="button-contain" *ngIf="!isMobile">
     <button @button (click)="playGame()">Play Game</button>
   </div>
   <div class="button-contain" style="grid-column-start: 2; grid-row-start: 3;" *ngIf="isMobile">
-    <button @button>Create game on computer!</button>
+    <button @button (click)="playGame()">Enter Code</button>
   </div>
 </div>

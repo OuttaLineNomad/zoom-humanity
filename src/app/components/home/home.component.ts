@@ -3,6 +3,8 @@ import { transition, trigger, style, animate } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { FirebaseService } from 'src/app/service/firebase.service';
+import { Observable } from 'rxjs';
+import { parseI18nMeta } from '@angular/compiler/src/render3/view/i18n/meta';
 
 @Component({
   selector: 'app-home',
@@ -66,6 +68,8 @@ export class HomeComponent implements OnInit {
     nn: 'Naughty Nataly Edition'
   };
 
+  test: Observable<string[]>;
+
   isMobile: boolean;
 
   constructor(
@@ -79,9 +83,12 @@ export class HomeComponent implements OnInit {
       const idk = this.titles[params.id];
 
       this.edition = idk ? idk : params.id;
+      if (!idk && params.id.length === 4) {
+        this.router.navigateByUrl(`/mobile/${params.id}`);
+      }
     });
 
-
+    this.test = this.afs.testGet();
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     if (this.isMobile) {
       if (this.edition === undefined || this.edition === 'mobile') {
@@ -92,6 +99,11 @@ export class HomeComponent implements OnInit {
   }
 
   playGame() {
+    if (this.isMobile) {
+      this.router.navigateByUrl(`/mobile/`);
+      return;
+    }
+
     const code = this.makeRandom();
     this.afs.createGame(code).subscribe(() => {
       this.router.navigate(['screen', code]);

@@ -18,6 +18,7 @@ import { HammerGestureConfig, HAMMER_GESTURE_CONFIG } from '@angular/platform-br
 import * as Hammer from 'hammerjs';
 import { WelcomeComponent } from './components/mobile/welcome/welcome.component';
 import { FormsModule } from '@angular/forms';
+import {MatIconModule} from '@angular/material/icon';
 export class HammerConfig extends HammerGestureConfig {
   overrides = {
     swipe: { direction: Hammer.DIRECTION_ALL }
@@ -42,7 +43,8 @@ export class HammerConfig extends HammerGestureConfig {
     MatButtonModule,
     HammerModule,
     FormsModule,
-    BrowserModule
+    BrowserModule,
+    MatIconModule
   ],
   providers: [
     {

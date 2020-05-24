@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, mergeMap } from 'rxjs/operators';
+import { take, mergeMap, map } from 'rxjs/operators';
 import { trigger, transition, style, animate, state } from '@angular/animations';
 import { FirebaseService, BlackCard } from 'src/app/service/firebase.service';
 import { environment } from 'src/environments/environment';
@@ -8,6 +8,8 @@ import { environment } from 'src/environments/environment';
 export interface PlayerScore {
   name: string;
   score: number;
+  send: boolean;
+  judge: boolean;
 }
 @Component({
   selector: 'app-screen',
@@ -75,6 +77,10 @@ export class ScreenComponent implements OnInit {
   currentJudge = 0;
   winner: string;
   wCard: string;
+  judgeName: string;
+  newJudge = true;
+
+
 
   constructor(
     private route: ActivatedRoute,
@@ -103,8 +109,18 @@ export class ScreenComponent implements OnInit {
         if (player.blackCards !== undefined) {
           score = this.getBlackScore(player.blackCards).length;
         }
-        return { name: player.playerName, score };
-      }).sort((a, b) => a.score < b.score ? -1 : a.score > b.score ? 1 : 0);
+        console.log(player);
+        if (player.whiteCards.length === 1 && this.started) {
+          this.afs.drawHands(1, this.code).pipe(
+            map(hands => {
+              return this.afs.dealHands(hands, [player.playerName], this.code);
+            })
+          ).subscribe(() => console.log('new player got hand'));
+
+        }
+
+        return { name: player.playerName, score, send: player.send, judge: player.judge };
+        }).sort((a, b) => b.score < a.score ? -1 : b.score > a.score ? 1 : 0);
 
       this.started = localStorage.getItem(`started:${this.code}`) === 'true';
       if (this.started) {
@@ -113,7 +129,7 @@ export class ScreenComponent implements OnInit {
       }
     });
 
-    this.isMobile = /Android|iPhone/i.test(navigator.userAgent);
+    this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     console.log(`is mobile ${this.isMobile}`);
 
   }
@@ -140,6 +156,7 @@ export class ScreenComponent implements OnInit {
     }
 
     this.afs.getJudge(this.code).subscribe(j => {
+      this.judgeName = j.judgeName;
       if (j.ready) {
         this.ready = true;
         this.bCard = j.blackCard.text.replace('_', '_____');
@@ -148,22 +165,28 @@ export class ScreenComponent implements OnInit {
         if (j.whiteCards !== undefined) {
           console.log('white cards in');
 
-          if (j.whiteCards.length === (this.players.length - 1)) {
-            console.log('white cards in and players in');
+          if (Object.keys(j.whiteCards).length === (this.players.length - 1)) {
+            console.log('white cards` in and players in');
             this.afs.allIn(this.code).catch(err => console.error(err));
           }
         }
-      }
-      if (j.done) {
-        this.currentJudge += 1;
-        if (this.currentJudge > (this.players.length - 1)) {
-          this.currentJudge = 0;
+        if (j.done && this.newJudge) {
+          this.currentJudge += 1;
+          if (this.currentJudge > (this.players.length - 1)) {
+            this.currentJudge = 0;
+          }
+
+          this.newJudge = false;
+          this.afs.setJudge(this.players[this.currentJudge], this.code).subscribe(() => {
+            console.log('start another Game with set judge');
+            this.wCard = j.winner.text;
+            this.winner = j.winner.playerName;
+            this.newJudge = true;
+          });
+          this.afs.okSend(this.code, this.players);
         }
-        this.wCard = j.winner.text;
-        this.winner = j.winner.playerName;
-        this.afs.setJudge(this.players[this.currentJudge], this.code).subscribe(() => console.log('start another Game with set judge'));
-        this.afs.okSend(this.code, this.players);
       }
+
     });
 
     localStorage.setItem(`started:${this.code}`, 'true');
@@ -178,7 +201,7 @@ export class ScreenComponent implements OnInit {
   }
 
   nextCard() {
-    this.afs.setJudge(this.players[this.currentJudge], this.code, true).subscribe(() => console.log('start Game with set judge'));
+    this.afs.setJudge(this.players[this.currentJudge], this.code, true).subscribe(() => console.log('Next Card'));
   }
 
 }

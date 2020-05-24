@@ -4,6 +4,7 @@ import { map, mergeMap, take } from 'rxjs/operators';
 import { Observable, Subject, of, forkJoin } from 'rxjs';
 import { all } from '../decks';
 import { HandCards } from '../components/mobile/mobile.component';
+import { AttachSession } from 'protractor/built/driverProviders';
 
 
 export interface BlackCard {
@@ -30,7 +31,7 @@ export interface PlayersWhiteCard {
 
 export interface Judge {
   blackCard: BlackCard;
-  whiteCards: PlayersWhiteCard[];
+  whiteCards: { [key: string]: PlayersWhiteCard }[];
   judgeName: string;
   allIn: boolean;
   done: boolean;
@@ -44,6 +45,7 @@ export interface Player {
   blackCards?: { [key: string]: BlackCard };
   score?: number;
   send?: boolean;
+  judge?: boolean;
 }
 
 export interface Players {
@@ -87,7 +89,7 @@ export class FirebaseService {
         const game = {
           decks,
           game: true
-        }
+        };
         return this.af.object(`/games/${code}`).set(game);
       })
     );
@@ -108,6 +110,7 @@ export class FirebaseService {
             blackCards: {},
             score: 0,
             send: false,
+            judge: false,
             whiteCards: ['Wait for for cards to be dealt or next round to start.']
           };
           return this.af.object<Player>(this.userPath).set(newPlayer).then(() => {
@@ -137,18 +140,9 @@ export class FirebaseService {
       whiteCard: card
     };
 
-    const setWhiteCard = this.af.object<PlayersWhiteCard[]>(`${this.basePath}/judge/whiteCards`).valueChanges()
-      .pipe(
-        take(1),
-        map(data => {
-          if (data === null) {
-            data = [];
-          }
-          data.push(whiteCard);
-          return this.af.object<PlayersWhiteCard[]>(`${this.basePath}/judge/whiteCards`).set(data);
-        }));
-
-    return setWhiteCard;
+    return this.af.object<boolean>(`${this.basePath}/players/${name}/send`).set(true).then(() => {
+      this.af.list<PlayersWhiteCard>(`${this.basePath}/judge/whiteCards`).push(whiteCard).catch(err => console.error(err));
+    }).catch(err => console.error(err));
   }
 
   getJudge(code: string): Observable<Judge> {
@@ -175,10 +169,20 @@ export class FirebaseService {
           ready,
           winner: null
         };
+        console.log('set judge =', judge);
 
-        return this.af.object<Judge>(`${this.basePath}/judge`).set(judge);
+        return this.af.object<Judge>(`${this.basePath}/judge`).set(judge).then(() => {
+          this.playerJudge(name, code).then(() => {
+            console.log(name, 'This is cool');
+          });
+        });
       })
     );
+  }
+
+  playerJudge(name: string, code: string) {
+    this.basePath = `/games/${code}`;
+    return this.af.object(`${this.basePath}/players/${name}/judge`).set(true).catch(err => console.error(err));
   }
 
   allIn(code: string) {
@@ -196,38 +200,46 @@ export class FirebaseService {
     for (const p of players) {
       console.log('players ==', p);
 
-      this.af.object<boolean>(`${this.basePath}/players/${p}/send`).set(true)
+      this.af.object<boolean>(`${this.basePath}/players/${p}/send`).set(false)
         .then(() => console.log('can send ==', p)).catch(err => {
           console.log(err);
         });
     }
   }
 
-  sendWinner(winner: HandCards, text: string, code: string) {
+  sendWinner(winner: HandCards, text: string, code: string, judgeName: string) {
     this.basePath = `/games/${code}`;
 
-    this.af.object(`${this.basePath}/judge/winner`).set(winner).then(() => {
-      this.af.object(`${this.basePath}/judge/done`).set(true).catch(err => {
-        console.log(err);
-      });
-    }).catch(err => {
-      console.log(err);
-    });
+    this.af.object(`${this.basePath}/players/${judgeName}/judge`).set(false).then(() => {
+      console.log(`${judgeName} == set to false`);
 
-    return this.af.list<Partial<BlackCard>>(`${this.basePath}/players/${winner.playerName}/blackCards`)
-      .push({ text })
-      .then(() => console.log('set winner'));
+    }).catch(err => console.error(err));
+
+    return this.af.object<Judge>(`${this.basePath}/judge`).update({ winner, done: true }).then(() => {
+      return this.af.list<Partial<BlackCard>>(`${this.basePath}/players/${winner.playerName}/blackCards`)
+        .push({ text })
+        .then(() => console.log('set winner'));
+    }).catch(err => console.error(err));
   }
 
-  drawCard(code: string) {
+  drawCard(code: string, amt: number) {
     this.basePath = `/games/${code}`;
     return this.af.list<string>(`${this.basePath}/decks/whiteCards`).valueChanges().pipe(
       take(1),
       map(cards => {
-        const randI = Math.floor(Math.random() * cards.length);
-        const card = cards.splice(randI, 1);
-        this.reSetWhiteCards(code, cards);
-        return card[0];
+        const newHand = [];
+        for (let i = 0; i < amt; i++) {
+          const randI = Math.floor(Math.random() * cards.length);
+          const card = cards.splice(randI, 1);
+
+          this.af.object(`${this.basePath}/decks/whiteCards/${randI}`).remove().catch(err => {
+            console.error(err);
+          });
+
+          newHand.push(card[0]);
+        }
+
+        return newHand;
       }));
   }
 
@@ -240,9 +252,13 @@ export class FirebaseService {
     return setPlyerHand;
   }
 
-  reSetWhiteCards(code: string, hands: string[]) {
+  resetMyCards(code: string, name: string) {
+
+  }
+
+  reSetWhiteCards(code: string, cards: string[]) {
     this.basePath = `/games/${code}`;
-    return this.af.object<string[]>(`${this.basePath}/decks/whiteCards`).set(hands).catch(err => console.log(err));
+    return this.af.object<string[]>(`${this.basePath}/decks/whiteCards`).set(cards).catch(err => console.log(err));
   }
 
   drawBlackCard(code: string) {
@@ -252,6 +268,10 @@ export class FirebaseService {
       map(cards => {
         const randI = Math.floor(Math.random() * cards.length);
         const card = cards.splice(randI, 1);
+
+        this.af.list(`${this.basePath}/decks/blackCards/${randI}`).remove().catch(err => {
+          console.error(err);
+        });
         return card[0];
       }));
   }
@@ -271,11 +291,10 @@ export class FirebaseService {
             const card = cards.splice(randI, 1);
             hand.push(card[0]);
           }
-          console.log('oneHand ==', hand);
-
           hands.push(hand);
         }
-        console.log(hands);
+
+        this.reSetWhiteCards(code, cards);
 
         return hands;
       }));
@@ -313,5 +332,12 @@ export class FirebaseService {
     return this.af.object(this.basePath).remove();
   }
 
+  test() {
+    this.af.list(`test`).push('cool');
+  }
+
+  testGet() {
+    return this.af.list<string>('test').valueChanges();
+  }
 
 }
