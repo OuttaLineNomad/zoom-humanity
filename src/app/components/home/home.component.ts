@@ -83,12 +83,14 @@ export class HomeComponent implements OnInit {
       const idk = this.titles[params.id];
 
       this.edition = idk ? idk : params.id;
-      if (!idk && params.id.length === 4) {
-        this.router.navigateByUrl(`/mobile/${params.id}`);
+      if (params.id) {
+        if (!idk && params.id.length === 4) {
+          this.router.navigateByUrl(`/mobile/${params.id}`);
+        }
       }
     });
 
-    this.test = this.afs.testGet();
+    // this.test = this.afs.testGet();
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     if (this.isMobile) {
       if (this.edition === undefined || this.edition === 'mobile') {

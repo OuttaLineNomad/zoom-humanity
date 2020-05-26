@@ -81,7 +81,6 @@ export class ScreenComponent implements OnInit {
   newJudge = true;
 
 
-
   constructor(
     private route: ActivatedRoute,
     private afs: FirebaseService,
@@ -89,7 +88,6 @@ export class ScreenComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-
     this.route.params.pipe(
       take(1),
       mergeMap(params => {
@@ -120,7 +118,7 @@ export class ScreenComponent implements OnInit {
         }
 
         return { name: player.playerName, score, send: player.send, judge: player.judge };
-        }).sort((a, b) => b.score < a.score ? -1 : b.score > a.score ? 1 : 0);
+      }).sort((a, b) => b.score < a.score ? -1 : b.score > a.score ? 1 : 0);
 
       this.started = localStorage.getItem(`started:${this.code}`) === 'true';
       if (this.started) {
@@ -131,7 +129,6 @@ export class ScreenComponent implements OnInit {
 
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     console.log(`is mobile ${this.isMobile}`);
-
   }
 
   getBlackScore(data: { [key: string]: BlackCard }): BlackCard[] {
@@ -202,6 +199,7 @@ export class ScreenComponent implements OnInit {
 
   nextCard() {
     this.afs.setJudge(this.players[this.currentJudge], this.code, true).subscribe(() => console.log('Next Card'));
+    this.afs.okSend(this.code, this.players);
   }
 
 }

@@ -78,14 +78,25 @@ export class FirebaseService {
     return /Android|iP(hone|od|ad)|Opera Mini|IEMobile/i.test(userAgent);
   }
 
+  getDeckCount(code: string) {
+    this.basePath = `/games/${code}`;
+    return this.af.list<BlackCard>(`${this.basePath}/decks/whiteCards`).valueChanges();
+  }
   // Create game from a computer screen
   createGame(code: string) {
     this.basePath = `/games/${code}`;
     return this.af.object<Decks>(`/decks`).valueChanges().pipe(
       map(f => {
-        return { whiteCards: f.whiteCards, blackCards: f.blackCards.filter(card => card.pick === 1) };
+        return {
+          whiteCards: f.whiteCards.filter((card, index) => {
+            return f.whiteCards.indexOf(card) === index;
+          }), blackCards: f.blackCards.filter((card, index) => {
+            return card.pick === 1 && f.blackCards.indexOf(card) === index;
+          })
+        };
       }),
       mergeMap(decks => {
+        console.log('decks ========', decks);
         const game = {
           decks,
           game: true
@@ -224,7 +235,7 @@ export class FirebaseService {
 
   drawCard(code: string, amt: number) {
     this.basePath = `/games/${code}`;
-    return this.af.list<string>(`${this.basePath}/decks/whiteCards`).valueChanges().pipe(
+    return this.af.list<string>(`${this.basePath}/decks/whiteCards`).snapshotChanges().pipe(
       take(1),
       map(cards => {
         const newHand = [];
@@ -232,11 +243,11 @@ export class FirebaseService {
           const randI = Math.floor(Math.random() * cards.length);
           const card = cards.splice(randI, 1);
 
-          this.af.object(`${this.basePath}/decks/whiteCards/${randI}`).remove().catch(err => {
+          this.af.list<string>(`${this.basePath}/decks/whiteCards`).remove(card[0].key).catch(err => {
             console.error(err);
           });
 
-          newHand.push(card[0]);
+          newHand.push(card[0].payload.val());
         }
 
         return newHand;
@@ -263,16 +274,16 @@ export class FirebaseService {
 
   drawBlackCard(code: string) {
     this.basePath = `/games/${code}`;
-    return this.af.list<BlackCard>(`${this.basePath}/decks/blackCards`).valueChanges().pipe(
+    return this.af.list<BlackCard>(`${this.basePath}/decks/blackCards`).snapshotChanges().pipe(
       take(1),
       map(cards => {
         const randI = Math.floor(Math.random() * cards.length);
         const card = cards.splice(randI, 1);
 
-        this.af.list(`${this.basePath}/decks/blackCards/${randI}`).remove().catch(err => {
+        this.af.list<BlackCard>(`${this.basePath}/decks/blackCards`).remove(card[0].key).catch(err => {
           console.error(err);
         });
-        return card[0];
+        return card[0].payload.val();
       }));
   }
 
@@ -336,8 +347,17 @@ export class FirebaseService {
     this.af.list(`test`).push('cool');
   }
 
-  testGet() {
-    return this.af.list<string>('test').valueChanges();
-  }
+  testGet(code) {
+    this.basePath = `/games/${code}`;
+    return this.af.list<BlackCard>(`${this.basePath}/decks/blackCards`).snapshotChanges()
+      .pipe(map(items => {
+                 // <== new way of chaining
+        return items.map(a => {
+          const data = a.payload.val();
+          const key = a.payload.key;
+          return { key, data };           // or {key, ...data} in case data is Obj
+        });
+      }));
+    }
 
 }
