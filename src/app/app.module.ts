@@ -5,8 +5,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AngularFireDatabaseModule } from '@angular/fire/database/public_api';
 import { AngularFireModule } from '@angular/fire';
+import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
 import { environment } from 'src/environments/environment';
 import { ScreenComponent } from './components/screen/screen.component';
 import { AnQrcodeModule } from 'an-qrcode';
@@ -37,6 +37,7 @@ export class HammerConfig extends HammerGestureConfig {
     AppRoutingModule,
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(environment.firebase),
+    AngularFireAnalyticsModule,
     AnQrcodeModule,
     MatListModule,
     MatCardModule,
