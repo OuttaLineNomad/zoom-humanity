@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take, mergeMap, map } from 'rxjs/operators';
 import { trigger, transition, style, animate, state } from '@angular/animations';
@@ -79,6 +79,7 @@ export class ScreenComponent implements OnInit {
   wCard: string;
   judgeName: string;
   newJudge = true;
+  full: boolean;
 
 
   constructor(
@@ -129,6 +130,17 @@ export class ScreenComponent implements OnInit {
 
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     console.log(`is mobile ${this.isMobile}`);
+  }
+
+  toggleFullScreen() {
+    const elem = document.body;
+    if (!this.full) {
+      elem.requestFullscreen();
+      this.full = true;
+      return;
+    }
+    this.full = false;
+    document.exitFullscreen();
   }
 
   getBlackScore(data: { [key: string]: BlackCard }): BlackCard[] {
@@ -191,10 +203,13 @@ export class ScreenComponent implements OnInit {
   }
 
   endGame() {
-    this.afs.endGame(this.code).then(() => {
-      this.router.navigateByUrl('/');
-    });
-    this.started = false;
+    const ok = confirm('You are about to end this game, this will end the game for all players.')
+    if (ok) {
+      this.afs.endGame(this.code).then(() => {
+        this.router.navigateByUrl('/');
+      });
+      this.started = false;
+    }
   }
 
   nextCard() {
