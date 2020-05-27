@@ -1,5 +1,5 @@
 <div class="mobile-container">
-  <div class="header">
+  <div class="header" >
     <p style="margin-bottom: 15px;">{{msg}}</p>
     <p>game code <span style="color: #de1738">
       {{code}}</span></p>
@@ -34,6 +34,46 @@
         </mat-card-content>
         <mat-card-actions >
           <button mat-button (click)="send(-1)">Ready</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+  <div *ngIf="help">
+    <div>
+      <mat-card [@card]="animateCard" class="card paper">
+        <mat-card-content>
+
+          <div class="arrow-left" [@arrow]="arrowLeft" [hidden]="arrowLeft === 'notYet' || arrowLeft === ''" (@arrow.done)="onDoneL($event)"
+          *ngIf="arrowLeft !== 'stop'">
+          <img src="../../../assets/arrow.svg" alt="">
+          <p>Previous Card</p>
+          </div>
+          <div class="arrow-up" [@arrow]="arrowUp" [hidden]="arrowUp === 'notYet' ||arrowUp === ''" (@arrow.done)="onDoneU($event)" *ngIf="arrowUp !== 'stop'">
+          <img src="../../../assets/arrow.svg" alt="">
+          <p>Send Card</p>
+          </div>
+          <div class="arrow-right" [@arrow]="arrowRight" [hidden]="arrowRight === 'notYet' ||arrowRight === ''" (@arrow.done)="onDoneR($event)" *ngIf="arrowRight !== 'stop'">
+          <img src="../../../assets/arrow.svg" alt="">
+          <p>Next Card</p>
+          </div>
+
+
+          <p  *ngIf="helpStage === 'right'">
+            Swipe right to see the next card in you hand.
+          </p>
+          <p *ngIf="helpStage === 'left'">
+            Swipe left to see previous card in hand.
+          </p>
+          <p *ngIf="helpStage === 'up'">
+            Swipe up to send a card to the judge or pick winning card.
+          </p>
+          <p>
+            {{howToPlay}}
+          </p>
+        </mat-card-content>
+        <mat-card-actions >
+          <button mat-button (click)="send(-2)" *ngIf="helpStage !== 'up'">Next</button>
+          <button mat-button (click)="send(-2)" *ngIf="helpStage === 'up'">Ready</button>
         </mat-card-actions>
       </mat-card>
     </div>

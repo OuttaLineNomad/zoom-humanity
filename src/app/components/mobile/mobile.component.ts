@@ -15,6 +15,23 @@ export interface HandCards {
   templateUrl: './mobile.component.html',
   styleUrls: ['./mobile.component.scss'],
   animations: [
+    trigger('arrow', [
+      transition('*=>arrowRight', [
+        animate('2000ms', style({
+          transform: 'translateX(150%)',
+        })),
+      ]),
+      transition('*=>arrowLeft', [
+        animate('2000ms', style({
+          transform: 'translateX(-150%) rotate(180deg) ',
+        })),
+      ]),
+      transition('*=>arrowUp', [
+        animate('2200ms', style({
+          transform: 'translateY(-300%)  rotate(270deg) ',
+        })),
+      ])
+    ]),
     trigger('card', [
       transition('*=>rightOut', [
         style({ zIndex: 100, boxShadow: 'none' }),
@@ -59,6 +76,12 @@ export class MobileComponent implements OnInit {
   endGame: boolean;
   judgeSub: Subscription;
   cardSent: boolean;
+  help: boolean;
+  arrowLeft: string;
+  arrowUp: string;
+  arrowRight: string;
+  howToPlay: string;
+  helpStage: string;
 
   @Input() playerName: string;
   @Input() code: string;
@@ -73,6 +96,38 @@ export class MobileComponent implements OnInit {
     window.scroll(0, 0);
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     this.setUpData(this.code, this.playerName);
+    const help = localStorage.getItem(`help${this.code}`);
+    if (help !== 'false') {
+      console.log('we in here');
+      this.arrowUp = 'notYet';
+      this.arrowLeft = 'notYet';
+      this.arrowRight = 'notYet';
+      this.help = true;
+      this.helpStage = 'right';
+      if (this.isMobile) {
+        this.arrowRight = 'arrowRight';
+      }
+    }
+
+  }
+
+  onDoneR($event) {
+    if (this.arrowRight === 'stop' || this.arrowRight === 'notYet') {
+      return;
+    }
+    this.arrowRight = this.arrowRight === 'arrowRight' ? '' : 'arrowRight';
+  }
+  onDoneL($event) {
+    if (this.arrowLeft === 'stop' || this.arrowLeft === 'notYet') {
+      return;
+    }
+    this.arrowLeft = this.arrowLeft === 'arrowLeft' ? '' : 'arrowLeft';
+  }
+  onDoneU($event) {
+    if (this.arrowUp === 'stop' || this.arrowUp === 'notYet') {
+      return;
+    }
+    this.arrowUp = this.arrowUp === 'arrowUp' ? '' : 'arrowUp';
   }
 
   setUpData(code: string, playerName: string) {
@@ -188,6 +243,28 @@ export class MobileComponent implements OnInit {
   }
 
   send(num: number) {
+    if (num === -2) {
+      if (this.helpStage === 'right') {
+        this.helpStage = 'left';
+        this.arrowRight = 'stop';
+        if (this.isMobile) {
+          this.arrowLeft = 'arrowLeft';
+        }
+        return;
+      }
+      if (this.helpStage === 'left') {
+        this.helpStage = 'up';
+        this.arrowLeft = 'stop';
+        if (this.isMobile) {
+          this.arrowUp = 'arrowUp';
+        }
+        return;
+      }
+      if (this.helpStage === 'up') {
+        this.help = false;
+        localStorage.setItem(`help${this.code}`, 'false');
+      }
+    }
     if (num === -1) {
       this.afs.ready(this.code);
       this.animateCard = 'sendOut';

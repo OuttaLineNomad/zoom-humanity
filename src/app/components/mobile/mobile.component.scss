@@ -1,5 +1,61 @@
 @import '../../../styles.scss';
 
+p{
+  line-height: 1;
+}
+
+.arrow-right {
+  width: 20vh;
+  position: absolute;
+  bottom: 25vh;
+  left: 25vw;
+  p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    font-size:6vw;
+    font-weight: bold;
+
+  }
+}
+
+.arrow-up {
+  width: 20vh;
+  position: absolute;
+  bottom: 25vh;
+  left: 20vw;
+  transform: rotate(270deg);
+  p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    font-size:6vw;
+    font-weight: bold;
+  }
+}
+.arrow-left {
+  width: 20vh;
+  position: absolute;
+  bottom: 25vh;
+  left: 20vw;
+  transform: rotate(180deg);
+  p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    white-space: nowrap;
+    font-size:4.5vw;
+    font-weight: bold;
+    transform: rotate(180deg) translate(50%, 50%);
+  }
+}
+
+
+
 .mobile-container {
   width: calc(100vw - 50px);
   height: calc(100vh - 50px);
@@ -15,6 +71,7 @@
   color: white;
   font-weight: bold;
   font-size: 2.5vh;
+  margin-bottom: 4vh;
 }
 
 .card {
