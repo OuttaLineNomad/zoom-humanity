@@ -6,7 +6,7 @@
   </div>
   <div class="button-contain">
     <button *ngIf="!started" @button (click)="startGame()">Start Game</button>
-    <button (click)="toggleFullScreen()">{{!full? 'Fullscreen': 'Exit'}}</button>
+    <button *ngIf="!safari" (click)="toggleFullScreen()">{{!full? 'Fullscreen': 'Exit'}}</button>
     <button *ngIf="started && ready" style="margin-bottom: 10px;" (click)="nextCard()">Next Card</button>
     <button *ngIf="started" (click)="endGame()">End Game</button>
   </div>
