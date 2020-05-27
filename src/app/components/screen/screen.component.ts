@@ -132,8 +132,7 @@ export class ScreenComponent implements OnInit {
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     console.log(`is mobile ${this.isMobile}`);
     const ua = navigator.userAgent.toLowerCase();
-    this.safari = ua.indexOf('safari') === -1;
-
+    this.safari = ua.indexOf('safari') !== -1;
   }
 
   toggleFullScreen() {

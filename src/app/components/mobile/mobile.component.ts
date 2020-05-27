@@ -108,7 +108,6 @@ export class MobileComponent implements OnInit {
         this.arrowRight = 'arrowRight';
       }
     }
-
   }
 
   onDoneR($event) {

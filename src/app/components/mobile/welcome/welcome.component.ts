@@ -83,7 +83,6 @@ export class WelcomeComponent implements OnInit {
         this.signedIn = true;
       }
     });
-
   }
 
   playGame(form: NgForm) {
