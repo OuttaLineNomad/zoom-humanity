@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { FirebaseService } from 'src/app/service/firebase.service';
 import { Observable } from 'rxjs';
-import { parseI18nMeta } from '@angular/compiler/src/render3/view/i18n/meta';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 
 @Component({
   selector: 'app-home',
@@ -75,6 +75,7 @@ export class HomeComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private afs: FirebaseService,
+    private analytics: AngularFireAnalytics,
     private router: Router,
   ) { }
 
@@ -101,15 +102,23 @@ export class HomeComponent implements OnInit {
   }
 
   playGame() {
+    this.analytics.logEvent('play game', { time: new Date() });
     if (this.isMobile) {
       this.router.navigateByUrl(`/mobile/`);
       return;
     }
 
     const code = this.makeRandom();
-    this.afs.createGame(code).subscribe(() => {
-      this.router.navigate(['screen', code]);
+    this.afs.verify(code).subscribe(val => {
+      if (val === null) {
+        this.afs.createGame(code).subscribe(() => {
+          this.router.navigate(['screen', code]);
+        });
+        return;
+      }
+      alert('Something went wrong hit that play button one more time.');
     });
+
   }
 
   makeRandom(): string {

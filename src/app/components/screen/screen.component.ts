@@ -4,6 +4,7 @@ import { take, mergeMap, map } from 'rxjs/operators';
 import { trigger, transition, style, animate, state } from '@angular/animations';
 import { FirebaseService, BlackCard } from 'src/app/service/firebase.service';
 import { environment } from 'src/environments/environment';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 
 export interface PlayerScore {
   name: string;
@@ -85,6 +86,7 @@ export class ScreenComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private afs: FirebaseService,
+    private analytics: AngularFireAnalytics,
     private router: Router
   ) { }
 
@@ -154,6 +156,7 @@ export class ScreenComponent implements OnInit {
   }
 
   startGame(restart: boolean = false) {
+    this.analytics.logEvent('start game', { code: this.code, time: new Date() });
     if (!restart) {
       this.afs.setJudge(this.players[this.currentJudge], this.code).subscribe(() => console.log('start Game with set judge'));
       this.afs.okSend(this.code, this.players);
@@ -203,8 +206,9 @@ export class ScreenComponent implements OnInit {
   }
 
   endGame() {
-    const ok = confirm('You are about to end this game, this will end the game for all players.')
+    const ok = confirm('You are about to end this game, this will end the game for all players.');
     if (ok) {
+      this.analytics.logEvent('end game', { code: this.code, time: new Date() });
       this.afs.endGame(this.code).then(() => {
         this.router.navigateByUrl('/');
       });
