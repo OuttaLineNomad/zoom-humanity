@@ -109,14 +109,15 @@ export class HomeComponent implements OnInit {
     }
 
     const code = this.makeRandom();
-    this.afs.verify(code).subscribe(val => {
+    this.afs.verify(code).pipe(take(1)).subscribe(val => {
       if (val === null) {
         this.afs.createGame(code).subscribe(() => {
           this.router.navigate(['screen', code]);
         });
-        return;
+      } else {
+        alert('Something went wrong hit that play button one more time.');
       }
-      alert('Something went wrong hit that play button one more time.');
+
     });
 
   }
