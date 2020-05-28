@@ -181,8 +181,6 @@ export class MobileComponent implements OnInit {
         }
       }
     });
-
-
   }
 
   getJudge(code: string) {

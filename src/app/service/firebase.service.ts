@@ -297,7 +297,7 @@ export class FirebaseService {
         const hands: string[][] = [[]];
         for (let i = 0; i < numOfHands; i++) {
           const hand: string[] = [];
-          for (let j = 0; j < 5; j++) {
+          for (let j = 0; j < 10; j++) {
             const randI = Math.floor(Math.random() * cards.length);
             const card = cards.splice(randI, 1);
             hand.push(card[0]);
