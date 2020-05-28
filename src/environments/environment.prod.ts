@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  uri:'https://zoom-humanity.web.app/',
+  uri:'https://against-humanity.com/',
   firebase: {
     apiKey: 'AIzaSyAC2L9bAsep0uz__w0AlcaWSYsTBnCmIPE',
     authDomain: 'zoom-humanity.firebaseapp.com',

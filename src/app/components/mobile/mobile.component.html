@@ -40,19 +40,19 @@
   </div>
   <div *ngIf="help">
     <div>
-      <mat-card [@card]="animateCard" class="card paper">
+      <mat-card [@card]="animateCard" class="card paper" (swipeRight)="send(-2)" (swipeUp)="send(-2)" (swipeLeft)="send(-2)">
         <mat-card-content>
 
-          <div class="arrow-left" [@arrow]="arrowLeft" [hidden]="arrowLeft === 'notYet' || arrowLeft === ''" (@arrow.done)="onDoneL($event)"
+          <div class="arrow-left" (swipeRight)="send(-2)" [@arrow]="arrowLeft" [hidden]="arrowLeft === 'notYet' || arrowLeft === ''" (@arrow.done)="onDoneL($event)"
           *ngIf="arrowLeft !== 'stop'">
           <img src="../../../assets/arrow.svg" alt="">
           <p>Previous Card</p>
           </div>
-          <div class="arrow-up" [@arrow]="arrowUp" [hidden]="arrowUp === 'notYet' ||arrowUp === ''" (@arrow.done)="onDoneU($event)" *ngIf="arrowUp !== 'stop'">
+          <div class="arrow-up"  (swipeUp)="send(-2)" [@arrow]="arrowUp" [hidden]="arrowUp === 'notYet' ||arrowUp === ''" (@arrow.done)="onDoneU($event)" *ngIf="arrowUp !== 'stop'">
           <img src="../../../assets/arrow.svg" alt="">
           <p>Send Card</p>
           </div>
-          <div class="arrow-right" [@arrow]="arrowRight" [hidden]="arrowRight === 'notYet' ||arrowRight === ''" (@arrow.done)="onDoneR($event)" *ngIf="arrowRight !== 'stop'">
+          <div class="arrow-right" (swipeLeft)="send(-2)" [@arrow]="arrowRight" [hidden]="arrowRight === 'notYet' ||arrowRight === ''" (@arrow.done)="onDoneR($event)" *ngIf="arrowRight !== 'stop'">
           <img src="../../../assets/arrow.svg" alt="">
           <p>Next Card</p>
           </div>

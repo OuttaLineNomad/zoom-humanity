@@ -80,7 +80,6 @@ export class ScreenComponent implements OnInit {
   judgeName: string;
   newJudge = true;
   full: boolean;
-  safari: boolean;
 
 
   constructor(
@@ -131,8 +130,6 @@ export class ScreenComponent implements OnInit {
 
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     console.log(`is mobile ${this.isMobile}`);
-    const ua = navigator.userAgent.toLowerCase();
-    this.safari = ua.indexOf('safari') !== -1;
   }
 
   toggleFullScreen() {
