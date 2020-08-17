@@ -64,8 +64,6 @@ export class HomeComponent implements OnInit {
   edition: string;
   titles = {
     rr: 'Rocky Robbie Edition',
-    dt: 'Dirty Turney Edition',
-    nn: 'Naughty Nataly Edition'
   };
 
   test: Observable<string[]>;
@@ -91,7 +89,6 @@ export class HomeComponent implements OnInit {
       }
     });
 
-    // this.test = this.afs.testGet();
     this.isMobile = this.afs.isMobileDevice(navigator.userAgent);
     if (this.isMobile) {
       if (this.edition === undefined || this.edition === 'mobile') {

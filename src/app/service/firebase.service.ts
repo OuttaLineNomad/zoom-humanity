@@ -4,14 +4,14 @@ import { map, mergeMap, take } from 'rxjs/operators';
 import { Observable, Subject, of, forkJoin } from 'rxjs';
 import { all } from '../decks';
 import { HandCards } from '../components/mobile/mobile.component';
-import { AttachSession } from 'protractor/built/driverProviders';
 
-
+// Black card is a single judged card. Pick is how many white cards players must pick.
 export interface BlackCard {
   text: string;
   pick: number;
 }
 
+// Box is the expansion packs for Cards Against Humanity.
 export interface Box {
   name: string;
   black: number[];
@@ -19,15 +19,18 @@ export interface Box {
   icon: number;
 }
 
+// Collection of black and white cards.
 export interface Decks {
   blackCards: BlackCard[];
   whiteCards: string[];
 }
 
+// When a player sends a white card to a judge this has the player the white card belongs to.
 export interface PlayersWhiteCard {
   whiteCard: string;
   player: string;
 }
+
 
 export interface Judge {
   blackCard: BlackCard;
@@ -82,6 +85,7 @@ export class FirebaseService {
     this.basePath = `/games/${code}`;
     return this.af.list<BlackCard>(`${this.basePath}/decks/whiteCards`).valueChanges();
   }
+
   // Create game from a computer screen
   createGame(code: string) {
     this.basePath = `/games/${code}`;
@@ -203,7 +207,11 @@ export class FirebaseService {
 
   ready(code: string) {
     this.basePath = `/games/${code}`;
-    return this.af.object(`${this.basePath}/judge/ready`).set(true).catch(e => console.log(e));
+    return this.af.object(`${this.basePath}/judge/ready`).set(true).then(() => {
+      this.af.object(`${this.basePath}/judge/allIn`).set(false).catch(er => console.log(er));
+    }).catch(e => {
+      console.log(e);
+    });
   }
 
   okSend(code: string, players: string[]) {
@@ -342,22 +350,4 @@ export class FirebaseService {
     this.basePath = `/games/${code}`;
     return this.af.object(this.basePath).remove();
   }
-
-  test() {
-    this.af.list(`test`).push('cool');
-  }
-
-  testGet(code) {
-    this.basePath = `/games/${code}`;
-    return this.af.list<BlackCard>(`${this.basePath}/decks/blackCards`).snapshotChanges()
-      .pipe(map(items => {
-                 // <== new way of chaining
-        return items.map(a => {
-          const data = a.payload.val();
-          const key = a.payload.key;
-          return { key, data };           // or {key, ...data} in case data is Obj
-        });
-      }));
-    }
-
 }

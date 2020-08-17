@@ -1,27 +1,32 @@
 # ZoomHumanity
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.0.
+A serverless Cards Against Humanity game. Made with Angular and Firebase realtime database. 
 
-## Development server
+I wanted to force people to play together like the real thing. The idea is to start the game on a computer, where you can share your screen with all the players. This screen controls the flow of the game. Then players scan the QR Code at the top of the shared screen.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+NSFW!!! The cards are taken from real decks in Cards Against Humanity, and some greatened from the community that like CAH. Lets just say they are worse then you think. Once everyone has logged in, the person sharing the screen can hit the Start Game button.
 
-## Code scaffolding
+Play here:  https://against-humanity.com/ 
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+I made the site, but you choose these horrible cards. So, that's on you.
 
-## Build
+# Contribution
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+@crhallerg was kind enough to collect all the CAH decks into a great JSON format. [Here](https://github.com/crhallberg/) is that project. The data you see in the game was sourced form here.
 
-## Running unit tests
+### Fine Print (Taken from above project)
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Please buy [Cards Against Humanity](https://cardsagainsthumanity.com/). They deserve your gross, germ-covered money more than you do.
 
-## Running end-to-end tests
+Card sources, merged by hand and machine: [Hangouts Against Humanity](https://github.com/samurailink3/hangouts-against-humanity), [Pretend You're Xyzzy](http://pyx-3.pretendyoure.xyz/zy/viewcards.jsp) and [this spreadsheet](https://docs.google.com/spreadsheet/ccc?key=0Ajv9fdKngBJ_dHFvZjBzZDBjTE16T3JwNC0tRlp6Wnc&usp=sharing#gid=55) I found through [Board Game Geek](https://boardgamegeek.com/).
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+**Is this legal?** Yes. Cards Against Humanity is distributed under a [Creative Commons BY-NC-SA 2.0 license](https://creativecommons.org/licenses/by-nc-sa/2.0/), and so is this website and all the data that comes out of it. That means you can use, remix, and share the game for free, but you can't sell it without permission. Consult [their FAQ](https://cardsagainsthumanity.com/#info) if you don't believe me. If you have paperwork that says otherwise, email me, we can work this out.
 
-## Further help
+# TODO
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+[] Document more and clean up code.
+[] Fix judge can see cards before all submitted sometimes.
+[] Add pick 2 back cards and the capability to ignore them.
+[] Add feature to select what deck to use
+  [] Add family friendly decks.
+[] Add cloud function to clean up abandoned games.
