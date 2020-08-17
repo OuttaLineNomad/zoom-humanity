@@ -12,7 +12,7 @@ I made the site, but you choose these horrible cards. So, that's on you.
 
 # Contribution
 
-@crhallerg was kind enough to collect all the CAH decks into a great JSON format. [Here](https://github.com/crhallberg/) is that project. The data you see in the game was sourced form here.
+[@crhallberg](https://github.com/crhallberg/) was kind enough to collect all the CAH decks into a great JSON format. [Here](https://github.com/crhallberg/json-against-humanity) is that project. The data you see in the game was sourced form here.
 
 ### Fine Print (Taken from above project)
 
